@@ -17,7 +17,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
-          java-version: '18.0.2'
+          java-version: '18'
 
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
