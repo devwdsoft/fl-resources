@@ -1,0 +1,64 @@
+name: Posts Cron Job
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Runs every 15 minutes
+  workflow_dispatch:      # Allows manual triggering
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: posts-cron
+          fetch-depth: 0
+
+      - name: Set up PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, bcmath, intl, curl, dom, fileinfo, openssl, pdo, tokenizer, xml
+          coverage: none
+
+      - name: Install Composer dependencies
+        working-directory: posts-cron
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Set up Laravel
+        working-directory: posts-cron
+        run: |
+          cp .env.example .env
+
+          echo "SOURCE_DOMAIN=${{ secrets.POSTS_SOURCE_DOMAIN }}" >> .env
+          echo "REJECT_KEYWORDS=${{ secrets.POSTS_REJECT_KEYWORDS }}" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+
+          export $(cat .env | grep -v '^#' | xargs)
+
+          php artisan key:generate
+
+      - name: Run Laravel command
+        working-directory: posts-cron
+        run: php artisan app:posts-cron
+
+      - name: Check and commit if changes
+        id: check
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [[ `git status --porcelain` ]]; then
+            git add .
+            git commit -m "Update output at $(date)"
+            git push origin posts-cron  # Replace with your branch if different
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No changes to commit."
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
