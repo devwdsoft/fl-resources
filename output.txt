@@ -1,0 +1,18 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :processResources NO-SOURCE
+> Task :compileKotlin
+> Task :compileJava NO-SOURCE
+> Task :classes UP-TO-DATE
+
+> Task :run
+Hello, Kotlin!
+VCL: true /home/runner/work/fl-resources/fl-resources/assets/test.txt
+i = 1
+i = 2
+i = 3
+i = 4
+i = 5
+
+BUILD SUCCESSFUL in 14s
+2 actionable tasks: 2 executed
