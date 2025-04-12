@@ -10,6 +10,7 @@ data class StaticImgTeam(val ID: String, val StaticImg: String)
 object TeamImageCrawler {
     private const val highQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/high/"
     private const val mediumQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/medium/"
+    private const val teamImagePath = "assets/teams/"
 
     private val json = Json { ignoreUnknownKeys = true }
 
