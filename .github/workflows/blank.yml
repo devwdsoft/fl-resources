@@ -2,7 +2,7 @@ name: Kotlin Cron Job
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Chạy mỗi phút
+    - cron: '30 * * * *'  # Chạy mỗi phút
   workflow_dispatch:      # Cho phép chạy thủ công nếu cần
 
 jobs:
