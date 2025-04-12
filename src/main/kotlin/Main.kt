@@ -12,4 +12,5 @@ fun main() {
     val file = File("assets/test.txt")
     file.appendText("\n${SimpleDateFormat().format(Date())}")
     ImageCrawlerUtil().crawlImage("enet/8456.png")
+    ImageCrawlerUtil().crawlImage("enet/84526.png")
 }
