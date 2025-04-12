@@ -42,7 +42,7 @@ object TeamImageCrawler {
 
         // Copy from StaticImg if it's not null or empty
         if (!StaticImg.isNullOrBlank()) {
-            val sourceFile = File("assets/$StaticImg")
+            val sourceFile = File("$teamImagePath$StaticImg")
             if (sourceFile.exists()) {
                 sourceFile.copyTo(destinationFile, overwrite = true)
                 println("CRAW SUCCESS - STATIC :$ID $Nm $StaticImg to $Img")
