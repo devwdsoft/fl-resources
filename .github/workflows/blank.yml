@@ -23,7 +23,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Run Kotlin Main
-        run: ./gradlew run > output.txt
+        run: ./gradlew run
 
       - name: Commit output if changed
         run: |
