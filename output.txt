@@ -4,7 +4,11 @@ Starting a Gradle Daemon (subsequent builds will be faster)
 > Task :compileKotlin
 > Task :compileJava NO-SOURCE
 > Task :classes UP-TO-DATE
-> Task :run
 
-BUILD SUCCESSFUL in 11s
+> Task :run
+Failed to download from https://lsm-static-prod.lsmedia8.com/high/: https://lsm-static-prod.lsmedia8.com/high/enet/84526.png
+Failed to download from https://lsm-static-prod.lsmedia8.com/medium/: https://lsm-static-prod.lsmedia8.com/medium/enet/84526.png
+Failed to download image from both URLs for enet/84526.png
+
+BUILD SUCCESSFUL in 14s
 2 actionable tasks: 2 executed
