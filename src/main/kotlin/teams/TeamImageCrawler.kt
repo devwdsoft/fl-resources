@@ -12,10 +12,11 @@ object TeamImageCrawler {
     private const val highQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/high/"
     private const val mediumQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/medium/"
     private const val teamImagePath = "assets/image/teams/"
+    private const val teamStaticImagePath = "assets/static/image/teams/"
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    private val staticImageTeams = mutableMapOf<String, String>()
+    val staticImageTeams = mutableMapOf<String, String>()
 
     fun fetchTeamImages() {
         initData()
@@ -30,10 +31,12 @@ object TeamImageCrawler {
         }
     }
 
-    private fun initData() {
+    fun initData() {
         val staticImgJson = File("assets/config/static-map.json").readText()
         staticImageTeams.clear()
-        staticImageTeams.putAll(json.decodeFromString<Map<String, String>>(staticImgJson))
+        staticImageTeams.putAll(json.decodeFromString<Map<String, String>>(staticImgJson).filter {
+            it.value.isNotBlank()
+        })
     }
 
     private fun crawTeamImage(ID: String, Nm: String, StaticImg: String?, Img: String) {
@@ -42,7 +45,7 @@ object TeamImageCrawler {
 
         // Copy from StaticImg if it's not null or empty
         if (!StaticImg.isNullOrBlank()) {
-            val sourceFile = File("$teamImagePath$StaticImg")
+            val sourceFile = File("$teamStaticImagePath$StaticImg")
             if (sourceFile.exists()) {
                 sourceFile.copyTo(destinationFile, overwrite = true)
                 println("CRAW SUCCESS - STATIC :$ID $Nm $StaticImg to $Img")

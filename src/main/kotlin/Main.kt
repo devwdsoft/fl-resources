@@ -1,5 +1,3 @@
-import kotlinx.serialization.Serializable
-import teams.TeamExtractor
 import teams.TeamImageCrawler
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
