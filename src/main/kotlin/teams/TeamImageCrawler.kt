@@ -12,7 +12,7 @@ object TeamImageCrawler {
     private const val highQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/high/"
     private const val mediumQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/medium/"
     private const val teamImagePath = "assets/image/teams/"
-    private const val teamStaticImagePath = "assets/image/static/teams/"
+    private const val teamStaticImagePath = "assets/static/teams/"
 
     private val json = Json { ignoreUnknownKeys = true }
 
