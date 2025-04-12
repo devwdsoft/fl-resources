@@ -17,7 +17,7 @@ object ImageCrawlerUtil {
             Files.copy(inputStream, Paths.get(outputPath), StandardCopyOption.REPLACE_EXISTING)
             return true
         } catch (e: Exception) {
-            println("Failed to download from $imageUrl: ${e.message}")
+            println("Failed to download from $imageUrl")
             return false
         }
     }
