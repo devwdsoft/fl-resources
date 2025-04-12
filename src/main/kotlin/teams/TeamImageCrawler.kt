@@ -25,7 +25,7 @@ object TeamImageCrawler {
             .plus(TeamExtractor.fetchTeams(2))
             .filter { !it.Img.isNullOrBlank() }
             .distinctBy { it.ID }
-        println("FETCHED ${teams.size} TEAMS FROM API")
+        println("\uD83D\uDE80 \uD83D\uDE80 \uD83D\uDE80FETCHED ${teams.size} TEAMS FROM API")
         teams.forEach {
             crawTeamImage(it.ID, it.Nm, staticImageTeams[it.ID], it.Img.orEmpty())
         }
@@ -66,7 +66,7 @@ object TeamImageCrawler {
             if (mediumQualitySuccess) {
                 println("CRAW SUCCESS - MEDIUM QUALITY: $ID $Nm $Img")
             } else {
-                println("CRAW FAIL: $ID $Nm $Img")
+                println("\uD83D\uDD25 \uD83D\uDD25 \uD83D\uDD25CRAW FAIL: $ID $Nm $Img")
             }
         }
     }
