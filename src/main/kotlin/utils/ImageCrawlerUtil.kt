@@ -6,52 +6,18 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
-class ImageCrawlerUtil {
+object ImageCrawlerUtil {
 
-    companion object {
-        private const val highQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/high/"
-        private const val mediumQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/medium/"
-    }
-
-    var filePath: String = ""
-
-    fun crawlImage(filePath: String) {
-        this.filePath = filePath
-        var success = false
+    fun crawlImage(imageUrl: String, outputPath: String): Boolean {
+        val destinationFile = File(outputPath)
         try {
-            success = downloadImage(highQualityBaseUrl)
-        } catch (e: Exception) {
-            println("Failed to download from high quality URL: ${e.message}")
-        }
-
-        if (!success) {
-            try {
-                success = downloadImage(mediumQualityBaseUrl)
-            } catch (e: Exception) {
-                println("Failed to download from medium quality URL: ${e.message}")
-            }
-        }
-
-        if (!success) {
-            println("Failed to download image from both URLs for $filePath")
-        }
-    }
-
-    private fun downloadImage(baseUrl: String): Boolean {
-        val fullUrl = "$baseUrl$filePath"
-        val destinationPath = "assets/images/teams/$filePath"
-        val destinationFile = File(destinationPath)
-        try {
-            val parent = destinationFile.parentFile
-            if (!parent.exists()) {
-                parent.mkdirs()
-            }
-            val url = URL(fullUrl)
+            destinationFile.parentFile?.mkdirs()
+            val url = URL(imageUrl)
             val inputStream = url.openStream()
-            Files.copy(inputStream, Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING)
+            Files.copy(inputStream, Paths.get(outputPath), StandardCopyOption.REPLACE_EXISTING)
             return true
         } catch (e: Exception) {
-            println("Failed to download from $baseUrl: ${e.message}")
+            println("Failed to download from $imageUrl: ${e.message}")
             return false
         }
     }
