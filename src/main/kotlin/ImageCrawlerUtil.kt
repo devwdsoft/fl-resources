@@ -39,7 +39,7 @@ class ImageCrawlerUtil {
 
     private fun downloadImage(baseUrl: String): Boolean {
         val fullUrl = "$baseUrl$filePath"
-        val destinationPath = "assets/team/$filePath"
+        val destinationPath = "assets/images/teams/$filePath"
         val destinationFile = File(destinationPath)
         try {
             val parent = destinationFile.parentFile
