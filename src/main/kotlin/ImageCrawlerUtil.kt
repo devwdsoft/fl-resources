@@ -9,8 +9,8 @@ import java.nio.file.StandardCopyOption
 class ImageCrawlerUtil {
 
     companion object {
-        private const val highQualityBaseUrl = "https://high.quality.images/"
-        private const val mediumQualityBaseUrl = "https://medium.quality.images/"
+        private const val highQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/high/"
+        private const val mediumQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/medium/"
     }
 
     var filePath: String = ""
@@ -33,7 +33,7 @@ class ImageCrawlerUtil {
         }
 
         if (!success) {
-            throw Exception("Failed to download image from both URLs")
+            println("Failed to download image from both URLs for $filePath")
         }
     }
 
