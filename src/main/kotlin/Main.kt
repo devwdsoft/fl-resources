@@ -5,4 +5,5 @@ import teams.TeamImageCrawler
 fun main() {
 //    TeamImageCrawler.fetchTeamImages()
     println(System.getenv())
+    println(System.getenv("BASE_SCHEDULE_API"))
 }
