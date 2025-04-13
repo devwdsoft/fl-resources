@@ -1,4 +1,4 @@
-name: Kotlin Cron Job
+name: Teams Cron Job
 
 on:
   schedule:
@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: teams-cron
 
       - name: Set up Amazon Corretto 18.0.2
         uses: actions/setup-java@v4
