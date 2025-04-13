@@ -23,11 +23,11 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Run Kotlin Main
-        run: ./gradlew run
-        env:
-          BASE_SCHEDULE_API: ${{ secrets.S_BASE_SCHEDULE_API }}
-          BASE_SCHEDULE_API_1: ${{ env.BASE_SCHEDULE_API }}
-          TEST_ENV: 'ABCCCCC'
+        run: |
+          export BASE_SCHEDULE_API="${{ secrets.S_BASE_SCHEDULE_API }}"
+          export BASE_SCHEDULE_API_1="$BASE_SCHEDULE_API"
+          export TEST_ENV="ABCCCCC"
+          ./gradlew run
 
       - name: Commit output if changed
         run: |
