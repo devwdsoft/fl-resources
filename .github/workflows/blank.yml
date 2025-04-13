@@ -1,4 +1,4 @@
-name: Kotlin Cron Job
+name: Teams Cron Job
 
 on:
   schedule:
@@ -39,7 +39,7 @@ jobs:
             git commit -m "Update output at $(date)"
             git push
             git checkout teams
-            git merge main
+            git merge teams-cron
             git push
           else
             echo "No changes to commit."
