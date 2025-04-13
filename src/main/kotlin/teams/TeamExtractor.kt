@@ -20,7 +20,6 @@ data class Stage(val Events: List<Event> = emptyList())
 data class Root(val Stages: List<Stage> = emptyList())
 
 object TeamExtractor {
-    private const val BASE_URL = "https://prod-cdn-public-api.lsmedia7.com/v1/api/app/date/soccer"
 
     private val client = OkHttpClient.Builder().build()
     private val json = Json { ignoreUnknownKeys = true }
@@ -28,7 +27,7 @@ object TeamExtractor {
     fun generateUrl(dayOffset: Int): String {
         val date = LocalDate.now().plusDays(dayOffset.toLong())
         val formatted = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-        return "$BASE_URL/$formatted/0?MD=0"
+        return "${System.getenv("BASE_SCHEDULE_API")}/$formatted/0?MD=0"
     }
 
     fun fetchTeams(dayOffset: Int): List<Team> {
