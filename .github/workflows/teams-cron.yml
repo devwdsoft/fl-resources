@@ -40,10 +40,10 @@ jobs:
             git add .
             git commit -m "Update output at $(date)"
             git push
-            git fetch origin teams
-            git checkout teams
+            git fetch origin teams-deploy
+            git checkout teams-deploy
             git rebase teams-cron
-            git push -f
+            git push
           else
             echo "No changes to commit."
           fi
