@@ -38,6 +38,9 @@ jobs:
             git add .
             git commit -m "Update output at $(date)"
             git push
+            git checkout teams
+            git merge main
+            git push
           else
             echo "No changes to commit."
           fi
