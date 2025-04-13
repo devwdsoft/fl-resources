@@ -43,7 +43,7 @@ jobs:
             git fetch origin teams
             git checkout teams
             git rebase teams-cron
-            git push
+            git push -f
           else
             echo "No changes to commit."
           fi
