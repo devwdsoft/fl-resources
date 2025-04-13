@@ -4,6 +4,8 @@ import teams.TeamImageCrawler
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 fun main() {
 //    TeamImageCrawler.fetchTeamImages()
+    println("================================>")
     println(System.getenv())
     println(System.getenv("BASE_SCHEDULE_API"))
+    println("================================>")
 }
