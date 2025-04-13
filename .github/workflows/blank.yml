@@ -8,10 +8,6 @@ on:
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
-    env:
-      BASE_SCHEDULE_API: ${{ secrets.S_BASE_SCHEDULE_API }}
-      BASE_SCHEDULE_API_1: $BASE_SCHEDULE_API
-      TEST_ENV: 'ABCCCCCC'
 
     steps:
       - name: Checkout repo
@@ -25,6 +21,12 @@ jobs:
 
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v2
+
+      - name: Export env variables
+        run: |
+          echo "BASE_SCHEDULE_API=${{ secrets.S_BASE_SCHEDULE_API }}" >> $GITHUB_ENV
+          echo "BASE_SCHEDULE_API_1=${{ env.BASE_SCHEDULE_API }}" >> $GITHUB_ENV
+          echo "TEST_ENV=ABCCCCCC" >> $GITHUB_ENV
 
       - name: Run Kotlin Main
         run: ./gradlew run
