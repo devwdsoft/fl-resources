@@ -1,8 +1,9 @@
 name: Kotlin Cron Job
 
 on:
-  schedule:
-    - cron: '5 0 * * *'  # Chạy lúc 0h05 mỗi ngày
+  push:
+    branches:
+      - main
   workflow_dispatch:      # Cho phép chạy thủ công nếu cần
 
 jobs:
@@ -24,8 +25,10 @@ jobs:
 
       - name: Run Kotlin Main
         run: |
-          export BASE_SCHEDULE_API="${{ secrets.S_BASE_SCHEDULE_API }}"
-          export BASE_SCHEDULE_API_1="${{ env.BASE_SCHEDULE_API }}"
+          echo 'Hi1 ${{ secrets.S_BASE_SCHEDULE_API }}'
+          echo 'Hi2 ${{ env.BASE_SCHEDULE_API }}'
+          export BASE_SCHEDULE_API='${{ secrets.S_BASE_SCHEDULE_API }}'
+          export BASE_SCHEDULE_API_1='${{ env.BASE_SCHEDULE_API }}'
           export TEST_ENV="ABCCCCC"
           ./gradlew run
 

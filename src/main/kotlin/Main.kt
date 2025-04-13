@@ -8,5 +8,6 @@ fun main() {
     println("ABC1: " + System.getenv("BASE_SCHEDULE_API"))
     println("ABC2: " + System.getenv("BASE_SCHEDULE_API_1"))
     println("ABC3: " + System.getenv("TEST_ENV"))
+    println("ABC4: " + System.getenv())
     println("============================>")
 }
