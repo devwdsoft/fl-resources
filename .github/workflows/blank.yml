@@ -9,7 +9,7 @@ jobs:
   build-and-run:
     runs-on: ubuntu-latest
     env:
-      BASE_SCHEDULE_API: ${{ secrets.S_BASE_SCHEDULE_API }}
+      BASE_SCHEDULE_API: $BASE_SCHEDULE_API
 
     steps:
       - name: Checkout repo
