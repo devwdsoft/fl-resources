@@ -24,9 +24,9 @@ jobs:
 
       - name: Run Kotlin Main
         run: |
-          export BASE_SCHEDULE_API='${{ vars.BASE_SCHEDULE_API }}'
-          export HIGH_QUALITY_URL='${{ vars.HIGH_QUALITY_URL }}'
-          export MEDIUM_QUALITY_URL='${{ vars.MEDIUM_QUALITY_URL }}'
+          export BASE_SCHEDULE_API='${{ secrets.S_BASE_SCHEDULE_API }}'
+          export HIGH_QUALITY_URL='${{ secrets.S_HIGH_QUALITY_URL }}'
+          export MEDIUM_QUALITY_URL='${{ secrets.S_MEDIUM_QUALITY_URL }}'
           ./gradlew run
 
       - name: Commit output if changed
