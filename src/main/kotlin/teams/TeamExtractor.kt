@@ -1,5 +1,6 @@
 package teams
 
+import Constant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -24,12 +25,6 @@ object TeamExtractor {
     private val client = OkHttpClient.Builder().build()
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun generateUrl(dayOffset: Int): String {
-        val date = LocalDate.now().plusDays(dayOffset.toLong())
-        val formatted = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-        return "${System.getenv("BASE_SCHEDULE_API")}/$formatted/0?MD=0"
-    }
-
     fun fetchTeams(dayOffset: Int): List<Team> {
         val url = generateUrl(dayOffset)
         val request = Request.Builder().url(url).build()
@@ -43,6 +38,12 @@ object TeamExtractor {
                 }
             }
         }
+    }
+
+    private fun generateUrl(dayOffset: Int): String {
+        val date = LocalDate.now().plusDays(dayOffset.toLong())
+        val formatted = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+        return "${System.getenv(Constant.ENV_BASE_API_URL)}/$formatted/0?MD=0"
     }
 
     private fun fetchJsonFromUrl(url: String): String {
