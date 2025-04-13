@@ -19,9 +19,9 @@ object TeamImageCrawler {
 
     fun fetchTeamImages() {
         initData()
-        val teams = TeamExtractor.fetchTeams(6)
-            .plus(TeamExtractor.fetchTeams(7))
-            .plus(TeamExtractor.fetchTeams(8))
+        val teams = TeamExtractor.fetchTeams(9)
+            .plus(TeamExtractor.fetchTeams(10))
+            .plus(TeamExtractor.fetchTeams(11))
             .filter { !it.Img.isNullOrBlank() }
             .distinctBy { it.ID }
         println("\uD83D\uDE80 \uD83D\uDE80 \uD83D\uDE80FETCHED ${teams.size} TEAMS FROM API")
