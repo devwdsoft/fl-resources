@@ -25,12 +25,9 @@ jobs:
 
       - name: Run Kotlin Main
         run: |
-          echo 'Hi1 ${{ secrets.S_BASE_SCHEDULE_API }}'
-          echo 'Hi2 ${{ env.BASE_SCHEDULE_API }}'
-          echo 'Hi2 ${{ vars.BASE_SCHEDULE_API }}'
-          export BASE_SCHEDULE_API='${{ secrets.S_BASE_SCHEDULE_API }}'
-          export BASE_SCHEDULE_API_1='${{ env.BASE_SCHEDULE_API }}'
-          export TEST_ENV="ABCCCCC"
+          export BASE_SCHEDULE_API='${{ vars.BASE_SCHEDULE_API }}'
+          export HIGH_QUALITY_URL='${{ vars.HIGH_QUALITY_URL }}'
+          export MEDIUM_QUALITY_URL='${{ vars.MEDIUM_QUALITY_URL }}'
           ./gradlew run
 
       - name: Commit output if changed

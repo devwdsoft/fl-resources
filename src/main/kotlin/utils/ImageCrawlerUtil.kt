@@ -17,7 +17,13 @@ object ImageCrawlerUtil {
             Files.copy(inputStream, Paths.get(outputPath), StandardCopyOption.REPLACE_EXISTING)
             return true
         } catch (e: Exception) {
-            println("Failed to download from $imageUrl")
+            if (imageUrl.startsWith(System.getenv("HIGH_QUALITY_URL"))) {
+                println("Failed to download from HIGH QUALITY $imageUrl")
+            }else if (imageUrl.startsWith(System.getenv("MEDIUM_QUALITY_URL"))) {
+                println("Failed to download from MEDIUM QUALITY $imageUrl")
+            }else {
+                println("Failed to download from $imageUrl")
+            }
             return false
         }
     }

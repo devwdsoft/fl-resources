@@ -9,8 +9,6 @@ import java.io.File
 data class StaticImgTeam(val ID: String, val StaticImg: String)
 
 object TeamImageCrawler {
-    private const val highQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/high/"
-    private const val mediumQualityBaseUrl = "https://lsm-static-prod.lsmedia8.com/medium/"
     private const val teamImagePath = "assets/image/teams/"
     private const val teamStaticImagePath = "assets/static/teams/"
 
@@ -55,13 +53,13 @@ object TeamImageCrawler {
             }
         }
         // Try to crawl high-quality image
-        val highQualityUrl = "$highQualityBaseUrl$Img"
+        val highQualityUrl = "${System.getenv("HIGH_QUALITY_URL")}$Img"
         val highQualitySuccess = ImageCrawlerUtil.crawlImage(highQualityUrl, destinationPath)
         if (highQualitySuccess) {
             println("CRAW SUCCESS - HIGH QUALITY: $ID $Nm $Img")
         } else {
             // If high-quality fails, try medium-quality
-            val mediumQualityUrl = "$mediumQualityBaseUrl$Img"
+            val mediumQualityUrl = "${System.getenv("MEDIUM_QUALITY_URL")}$Img"
             val mediumQualitySuccess = ImageCrawlerUtil.crawlImage(mediumQualityUrl, destinationPath)
             if (mediumQualitySuccess) {
                 println("CRAW SUCCESS - MEDIUM QUALITY: $ID $Nm $Img")
