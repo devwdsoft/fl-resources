@@ -2,7 +2,7 @@
 # https://github.com/firebase/firebase-tools
 # ffsdata1
 
-name: Deploy to Firebase Hosting on merge
+name: Deploy teams assets
 on:
   push:
     branches:
