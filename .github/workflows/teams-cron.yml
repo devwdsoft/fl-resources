@@ -42,7 +42,7 @@ jobs:
             git push
             git fetch origin teams
             git checkout teams
-            git merge teams-cron
+            git rebase teams-cron
             git push
           else
             echo "No changes to commit."
