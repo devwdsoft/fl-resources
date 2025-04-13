@@ -5,8 +5,8 @@
 name: Deploy teams assets
 on:
   push:
-    branches:
-      - teams-deploy
+    tags:
+      - 'deploy-teams-*'
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest

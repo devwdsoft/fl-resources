@@ -41,10 +41,10 @@ jobs:
             git add .
             git commit -m "Update output at $(date)"
             git push
-            git fetch origin teams-deploy
-            git checkout teams-deploy
-            git rebase teams-cron
-            git push
+          
+            TAG_NAME="deploy-teams-$(date +'%Y%m%d-%H%M%S')"
+            git tag $TAG_NAME
+            git push origin $TAG_NAME
           else
             echo "No changes to commit."
           fi
