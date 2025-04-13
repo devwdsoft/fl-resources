@@ -25,7 +25,7 @@ jobs:
       - name: Run Kotlin Main
         run: |
           export BASE_SCHEDULE_API="${{ secrets.S_BASE_SCHEDULE_API }}"
-          export BASE_SCHEDULE_API_1="$BASE_SCHEDULE_API"
+          export BASE_SCHEDULE_API_1="${{ env.BASE_SCHEDULE_API }}"
           export TEST_ENV="ABCCCCC"
           ./gradlew run
 
