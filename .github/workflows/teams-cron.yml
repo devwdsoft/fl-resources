@@ -40,8 +40,9 @@ jobs:
             git add .
             git commit -m "Update output at $(date)"
             git push
+            git fetch origin teams
             git checkout teams
-            git merge main
+            git merge teams-cron
             git push
           else
             echo "No changes to commit."
