@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
-    implementation("com.squareup.okhttp3:okhttp:4.9.2")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 }
 
