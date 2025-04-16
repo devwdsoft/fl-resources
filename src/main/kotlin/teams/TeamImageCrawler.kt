@@ -1,6 +1,7 @@
 package teams
 
 import Constant
+import extension.getEnv
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import utils.ImageCrawlerUtil
@@ -54,13 +55,13 @@ object TeamImageCrawler {
             }
         }
         // Try to crawl high-quality image
-        val highQualityUrl = "${System.getenv(Constant.ENV_HIGH_QUALITY_URL)}$Img"
+        val highQualityUrl = "${getEnv(Constant.ENV_HIGH_QUALITY_URL)}$Img"
         val highQualitySuccess = ImageCrawlerUtil.crawlImage(highQualityUrl, destinationPath)
         if (highQualitySuccess) {
             println("CRAW SUCCESS - HIGH QUALITY: $ID $Nm $Img")
         } else {
             // If high-quality fails, try medium-quality
-            val mediumQualityUrl = "${System.getenv(Constant.ENV_MEDIUM_QUALITY_URL)}$Img"
+            val mediumQualityUrl = "${getEnv(Constant.ENV_MEDIUM_QUALITY_URL)}$Img"
             val mediumQualitySuccess = ImageCrawlerUtil.crawlImage(mediumQualityUrl, destinationPath)
             if (mediumQualitySuccess) {
                 println("CRAW SUCCESS - MEDIUM QUALITY: $ID $Nm $Img")
