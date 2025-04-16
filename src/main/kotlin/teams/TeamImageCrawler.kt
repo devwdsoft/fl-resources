@@ -1,7 +1,7 @@
 package teams
 
 import Constant
-import extension.getEnv
+import io.github.cdimascio.dotenv.dotenv
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import utils.ImageCrawlerUtil
@@ -21,7 +21,7 @@ object TeamImageCrawler {
     fun fetchTeamImages() {
         initData()
         val teams = buildList {
-            (0 until (getEnv(Constant.ENV_DATE_COUNT_TO_FETCH_TEAMS)?.toInt() ?: 1)).forEach {
+            (0 until (dotenv()[Constant.ENV_DATE_COUNT_TO_FETCH_TEAMS]?.toInt() ?: 1)).forEach {
                 addAll(TeamExtractor.fetchTeams(it))
             }
         }.filter { !it.Img.isNullOrBlank() }
@@ -61,13 +61,13 @@ object TeamImageCrawler {
             }
         }
         // Try to crawl high-quality image
-        val highQualityUrl = "${getEnv(Constant.ENV_HIGH_QUALITY_URL)}$Img"
+        val highQualityUrl = "${dotenv()[Constant.ENV_HIGH_QUALITY_URL]}$Img"
         val highQualitySuccess = ImageCrawlerUtil.crawlImage(highQualityUrl, destinationPath)
         if (highQualitySuccess) {
             println("$index CRAW SUCCESS - HIGH QUALITY: $ID $Nm $Img")
         } else {
             // If high-quality fails, try medium-quality
-            val mediumQualityUrl = "${getEnv(Constant.ENV_MEDIUM_QUALITY_URL)}$Img"
+            val mediumQualityUrl = "${dotenv()[Constant.ENV_MEDIUM_QUALITY_URL]}$Img"
             val mediumQualitySuccess = ImageCrawlerUtil.crawlImage(mediumQualityUrl, destinationPath)
             if (mediumQualitySuccess) {
                 println("$index CRAW SUCCESS - MEDIUM QUALITY: $ID $Nm $Img")

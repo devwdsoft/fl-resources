@@ -1,7 +1,7 @@
 package teams
 
 import Constant
-import extension.getEnv
+import io.github.cdimascio.dotenv.dotenv
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -44,7 +44,7 @@ object TeamExtractor {
     private fun generateUrl(dayOffset: Int): String {
         val date = LocalDate.now().plusDays(dayOffset.toLong())
         val formatted = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-        return "${getEnv(Constant.ENV_BASE_API_URL)}/$formatted/0?MD=0"
+        return "${dotenv()[Constant.ENV_BASE_API_URL]}/$formatted/0?MD=0"
     }
 
     private fun fetchJsonFromUrl(url: String): String {
