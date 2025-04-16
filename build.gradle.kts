@@ -16,6 +16,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.9.2")
 
     testImplementation(kotlin("test"))
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("io.github.cdimascio:dotenv-kotlin:6.4.1")
 }
 
 application {
