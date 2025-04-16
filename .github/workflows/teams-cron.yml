@@ -32,6 +32,7 @@ jobs:
           export BASE_SCHEDULE_API='${{ secrets.S_BASE_SCHEDULE_API }}'
           export HIGH_QUALITY_URL='${{ secrets.S_HIGH_QUALITY_URL }}'
           export MEDIUM_QUALITY_URL='${{ secrets.S_MEDIUM_QUALITY_URL }}'
+          export DATE_COUNT_TO_FETCH_TEAMS='${{ vars.DATE_COUNT_TO_FETCH_TEAMS }}'
           ./gradlew run
 
       - name: Check and commit if changes
