@@ -2,17 +2,14 @@ package teams
 
 import Constant
 import extension.getEnv
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import utils.ImageCrawlerUtil
 import java.io.File
 
-@Serializable
-data class StaticImgTeam(val ID: String, val StaticImg: String)
-
 object TeamImageCrawler {
     private const val teamImagePath = "assets/image/teams/"
     private const val teamStaticImagePath = "assets/static/teams/"
+    private const val stageBadgeImagePath = "assets/image/competitions/"
 
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -20,19 +17,33 @@ object TeamImageCrawler {
 
     fun fetchTeamImages() {
         initData()
-        val teams = buildList {
-            (0 until (getEnv(Constant.ENV_DATE_COUNT_TO_FETCH_TEAMS)?.toInt() ?: 1)).forEach {
-                addAll(TeamExtractor.fetchTeams(it))
-            }
-        }.filter { !it.Img.isNullOrBlank() }
+        val teams = mutableListOf<Team>()
+        val stageBadges = mutableListOf<StageBadge>()
+        (0 until (getEnv(Constant.ENV_DATE_COUNT_TO_FETCH_TEAMS)?.toInt() ?: 1)).forEach {
+            val crawData = TeamExtractor.fetchCrawData(it)
+            teams.addAll(crawData.teams)
+            stageBadges.addAll(crawData.stageBadges)
+        }
+        val distinctTeams = teams
+            .filter { !it.Img.isNullOrBlank() }
             .distinctBy { it.ID }
-        teams.forEachIndexed { index, team ->
+        distinctTeams.forEachIndexed { index, team ->
             crawTeamImage(
                 team.ID,
                 team.Nm,
                 staticImageTeams[team.ID],
                 team.Img.orEmpty(),
-                String.format("%04d/%04d", index + 1, teams.size)
+                String.format("%04d/%04d", index + 1, distinctTeams.size)
+            )
+        }
+        val distinctStages = stageBadges
+            .filter { !it.badge.isNullOrBlank() }
+            .distinctBy { it.Sid }
+        distinctStages.forEachIndexed { index, stageBadge ->
+            crawStageBadge(
+                stageBadge.Sid,
+                stageBadge.badge.orEmpty(),
+                String.format("%04d/%04d", index + 1, distinctStages.size)
             )
         }
     }
@@ -73,6 +84,23 @@ object TeamImageCrawler {
                 println("$index CRAW SUCCESS - MEDIUM QUALITY: $ID $Nm $Img")
             } else {
                 println("$index \uD83D\uDD25 \uD83D\uDD25 \uD83D\uDD25CRAW FAIL: $ID $Nm $Img")
+            }
+        }
+    }
+
+    private fun crawStageBadge(id: String, badge: String, index: String) {
+        val destinationPath = "$stageBadgeImagePath$badge"
+        val highQualityUrl = "${getEnv(Constant.ENV_STAGE_HIGH_QUALITY_URL)}$badge"
+        val success = ImageCrawlerUtil.crawlImage(highQualityUrl, destinationPath)
+        if (success) {
+            println("$index CRAW SUCCESS - STAGE BADGE - HIGH QUALITY: $id $badge $index")
+        } else {
+            val mediumUrl = "${getEnv(Constant.ENV_STAGE_MEDIUM_QUALITY_URL)}$badge"
+            val mediumSuccess = ImageCrawlerUtil.crawlImage(mediumUrl, destinationPath)
+            if (mediumSuccess) {
+                println("$index CRAW SUCCESS - STAGE BADGE - MEDIUM QUALITY: $id $badge $index")
+            } else {
+                println("$index \uD83D\uDD25 \uD83D\uDD25 \uD83D\uDD25CRAW FAIL: $id $badge $index")
             }
         }
     }
