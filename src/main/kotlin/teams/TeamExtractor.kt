@@ -16,7 +16,7 @@ data class Team(val ID: String, val Nm: String, val Img: String? = null)
 data class Event(val T1: List<Team> = emptyList(), val T2: List<Team> = emptyList())
 
 @Serializable
-data class Stage(val Sid: String, val badgeUrl: String?, val Events: List<Event> = emptyList())
+data class Stage(val Sid: String, val badgeUrl: String? = null, val Events: List<Event> = emptyList())
 
 data class StageBadge(val Sid: String, val badge: String?)
 
