@@ -33,6 +33,8 @@ jobs:
           export HIGH_QUALITY_URL='${{ secrets.S_HIGH_QUALITY_URL }}'
           export MEDIUM_QUALITY_URL='${{ secrets.S_MEDIUM_QUALITY_URL }}'
           export DATE_COUNT_TO_FETCH_TEAMS='${{ vars.DATE_COUNT_TO_FETCH_TEAMS }}'
+          export STAGE_HIGH_QUALITY_URL='${{ secrets.S_STAGE_HIGH_QUALITY_URL }}'
+          export STAGE_MEDIUM_QUALITY_URL='${{ secrets.S_STAGE_MEDIUM_QUALITY_URL }}'
           ./gradlew run
 
       - name: Check and commit if changes
