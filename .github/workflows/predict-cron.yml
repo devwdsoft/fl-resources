@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Laravel command
         working-directory: posts-cron
-        run: php artisan app:posts-cron
+        run: php artisan app:predict-cron
 
       - name: Check and commit if changes
         id: check
