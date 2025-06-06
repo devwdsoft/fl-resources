@@ -29,6 +29,7 @@ abstract class Controller
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
         //curl_setopt($ch, CURLOPT_PROXY, "127.0.0.1:8888");
         $result = curl_exec($ch);
+        echo "VCL $result\n";
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($http_status != 200) {
             return null;

@@ -36,7 +36,7 @@ class PredictCron extends Command
 
     private function getWM($date)
     {
-        $url = env('WM_SOURCE') . "?id=$date&tzo=0";
+        $url = env('WM_SOURCE') . "/?id=$date&tzo=0";
         echo $url . "\n";
         $response = Controller::getData($url);
         $data = json_decode($response);
