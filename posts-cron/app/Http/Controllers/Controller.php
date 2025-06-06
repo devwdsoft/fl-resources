@@ -16,7 +16,7 @@ abstract class Controller
                 "X-Client-IP: " . Controller::fakeIp(),
                 "Client-IP: " . Controller::fakeIp(),
                 "HTTP_X_FORWARDED_FOR: " . Controller::fakeIp(),
-                "X-Forwarded-For: " . Controller::fakeIp()
+                "X-Forwarded-For: " . Controller::fakeIp(),
             )
         );
         if ($args) {
