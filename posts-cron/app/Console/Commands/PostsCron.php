@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Http\Controllers\Controller;
 use App\Models\FootballNews;
+use Illuminate\Support\Facades\File;
 
 class PostsCron extends Command
 {
@@ -116,7 +117,8 @@ class PostsCron extends Command
             }
             $body = $data->pageProps->article->body;
             $status = $this->checkBody($body) ? "publish" : "review-request";
-            self::crawImage($post["imageUrl"], $post["id"] . "/image");
+            $newsAssetPath = "../assets/news/" . $post["id"];
+            self::crawImage($post["imageUrl"], $newsAssetPath, "image");
             $meta = $data->pageProps->layoutContext->meta;
             FootballNews::where("id", $post["id"])
                 ->update([
@@ -130,7 +132,7 @@ class PostsCron extends Command
             foreach ($body as $b) {
                 if (isset($b->type) && $b->type == "image") {
                     $b->data->type = "image";
-                    $b->data->image = self::crawImage($b->image->article->url, $post["id"] . "/" . md5($b->image->article->url));
+                    $b->data->image = self::crawImage($b->image->article->url, $newsAssetPath, md5($b->image->article->url));
                 }
                 array_push($bodyArray, $b);
             }
@@ -194,16 +196,20 @@ class PostsCron extends Command
         return $result;
     }
 
-    public static function crawImage($url, $fileName = null)
+    public static function crawImage($url, $folder, $fileName)
     {
         $name = $fileName;
         if ($fileName == null) {
-            $name = md5($url);
+            return "";
+        }
+        // Kiểm tra và tạo thư mục nếu chưa tồn tại
+        if (!File::exists($folder)) {
+            File::makeDirectory($folder, 0777, true, true);
         }
         $name = $name . self::getImageExt($url);
         $contents = Controller::getData($url);
         if (strlen($contents) > 10000) {
-            file_put_contents("../assets/news/" . $name, $contents);
+            file_put_contents($folder . "/" . $name, $contents);
             if ($fileName != null) {
                 return $contents;
             }
