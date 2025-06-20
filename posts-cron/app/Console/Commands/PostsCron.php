@@ -116,7 +116,7 @@ class PostsCron extends Command
             }
             $body = $data->pageProps->article->body;
             $status = $this->checkBody($body) ? "publish" : "review-request";
-            self::crawImage($post["imageUrl"], $post["id"]);
+            self::crawImage($post["imageUrl"], $post["id"] . "/image");
             $meta = $data->pageProps->layoutContext->meta;
             FootballNews::where("id", $post["id"])
                 ->update([
@@ -130,7 +130,7 @@ class PostsCron extends Command
             foreach ($body as $b) {
                 if (isset($b->type) && $b->type == "image") {
                     $b->data->type = "image";
-                    $b->data->image = self::crawImage($b->image->article->url);
+                    $b->data->image = self::crawImage($b->image->article->url, $post["id"] . "/" . md5($b->image->article->url));
                 }
                 array_push($bodyArray, $b);
             }
