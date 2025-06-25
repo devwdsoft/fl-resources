@@ -9,7 +9,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('football_news', function (Blueprint $table) {
-            $table->unsignedBigInteger('id')->primary();
+            $table->string('id')->primary();
             $table->string('title', 300);
             $table->string('slug', 300);
             $table->integer('publishedAt');
