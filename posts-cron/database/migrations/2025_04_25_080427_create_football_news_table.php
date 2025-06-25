@@ -37,7 +37,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->foreign('football_news_id')->references('id')->on('football_news')->onDelete('cascade');
-            $table->foreign('tag_id')->references('id')->on('football_news_tags')->onDelete('cascade');
+            $table->foreign('football_news_tag_id')->references('id')->on('football_news_tags')->onDelete('cascade');
         });
 
         Schema::create('football_news_meta_tags', function (Blueprint $table) {
