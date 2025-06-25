@@ -2,40 +2,38 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Http\Controllers\Controller;
 use App\Models\FootballNews;
 use App\Models\FootballNewsTag;
-use App\Models\FootballNewsMetaTag;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
 class PostsCron extends Command
 {
     protected $signature = 'app:posts-cron';
-    protected $description = 'Crawl and save football posts';
+    protected $description = 'Crawl and save football news from remote source';
 
     public function handle()
     {
-        $this->info('PostsCron command started!');
-        $buildId = $this->getBuildId();
+        $this->info('PostsCron started');
 
+        $buildId = $this->getBuildId();
         if (!$buildId) {
-            $this->warn('Build ID not found!');
+            $this->error('Build ID not found!');
             return;
         }
 
         $this->createNewPosts($buildId);
 
-        $needUpdateBodyPosts = $this->getNeedUpdateBodyPosts();
-        foreach ($needUpdateBodyPosts as $post) {
-            $this->info('CRAW BODY - ' . $post["id"]);
+        foreach ($this->getNeedUpdateBodyPosts() as $post) {
+            $this->info('Updating body for post ID: ' . $post["id"]);
             $this->updatePostBody($post, $buildId);
         }
 
-        $this->info('PostsCron command completed!');
+        $this->info('PostsCron finished');
     }
 
-    private function getBuildId()
+    private function getBuildId(): ?string
     {
         $data = Controller::getData(env('SOURCE_DOMAIN') . "en/");
         if ($data) {
@@ -45,128 +43,129 @@ class PostsCron extends Command
         return null;
     }
 
-    private function createNewPosts($buildId)
+    private function createNewPosts(string $buildId): void
     {
         $data = json_decode(Controller::getData(env('SOURCE_DOMAIN') . "_next/data/$buildId/en/news/football.json?category=football"));
+
         if ($data?->pageProps?->articles) {
             $oldIds = $this->getOldNewsId();
             foreach ($data->pageProps->articles as $article) {
-                if (!in_array($article->id, $oldIds) && self::checkValidContent($article->title)) {
-                    $article->publishedAt = strtotime($article->publishedAt);
+                if (in_array($article->id, $oldIds)) continue;
+                if (!self::checkValidContent($article->title)) continue;
 
-                    $this->info('NEW POST - ' . $article->id);
-                    $news = FootballNews::create([
-                        "id" => $article->id,
-                        "title" => $article->title,
-                        "slug" => str_ireplace("-" . $article->id . "/", "", str_replace("/en/news/", "", $article->url)),
-                        "publishedAt" => $article->publishedAt,
-                        "imageUrl" => $article->mainMedia[0]->gallery->url,
-                        "alt" => $article->mainMedia[0]->gallery->alt,
-                        "updatedTime" => 0,
-                        "imageExt" => self::getImageExt($article->mainMedia[0]->original->url),
-                        "status" => "draft"
-                    ]);
+                $publishedAt = strtotime($article->publishedAt);
+                $slug = str_ireplace("-{$article->id}/", "", str_replace("/en/news/", "", $article->url));
 
-                    // Lưu tags
-                    if (isset($article->related->tags)) {
-                        $tags = array_map(function ($tag) {
-                            return [
-                                'title' => $tag->title,
-                                'type' => $tag->type ?? null,
-                                'href' => $tag->href ?? null,
-                                'provider' => $tag->provider ?? null
-                            ];
-                        }, $article->related->tags);
+                $news = FootballNews::create([
+                    'id' => $article->id,
+                    'title' => $article->title,
+                    'slug' => $slug,
+                    'publishedAt' => $publishedAt,
+                    'imageUrl' => $article->mainMedia[0]->gallery->url,
+                    'alt' => $article->mainMedia[0]->gallery->alt ?? '',
+                    'updatedTime' => 0,
+                    'imageExt' => self::getImageExt($article->mainMedia[0]->original->url),
+                    'status' => 'draft'
+                ]);
 
-                        $news->tags()->createMany($tags);
-                    }
-                }
+                $tags = collect($article->related->tags ?? [])->map(function ($tag) {
+                    return FootballNewsTag::firstOrCreate([
+                        'title' => $tag->title
+                    ], [
+                        'type' => $tag->type ?? null
+                    ])->id;
+                })->toArray();
+
+                $news->tags()->sync($tags);
             }
         }
     }
 
-    private function getOldNewsId()
+    private function updatePostBody(array $post, string $buildId): string
+    {
+        $url = env('SOURCE_DOMAIN') . "_next/data/$buildId/en/news/article/{$post['slug']}-{$post['id']}.json?article={$post['slug']}-{$post['id']}";
+        $data = json_decode(Controller::getData($url));
+
+        if ($data?->notFound) {
+            FootballNews::where('id', $post['id'])->increment('updatedTime');
+            return "NOT FOUND - {$post['id']}";
+        }
+
+        if (!isset($data->pageProps->article->body)) {
+            FootballNews::where('id', $post['id'])->increment('updatedTime');
+            return "NO BODY - {$post['id']}";
+        }
+
+        $body = $data->pageProps->article->body;
+        $relatedIds = collect($data->pageProps->article->related->relatedArticles ?? [])->pluck('id')->toArray();
+        $meta = $data->pageProps->layoutContext->meta ?? null;
+
+        $assetPath = public_path("assets/news/{$post['id']}");
+        self::crawImage($post['imageUrl'], $assetPath, 'image');
+
+        $bodyArray = [];
+        foreach ($body as $b) {
+            if (isset($b->type) && $b->type === 'image' && isset($b->image->article->url)) {
+                $b->data->type = 'image';
+                $b->data->image = self::crawImage($b->image->article->url, $assetPath, md5($b->image->article->url));
+            }
+            $bodyArray[] = $b;
+        }
+
+        $status = $this->checkBody($body) ? 'publish' : 'review-request';
+
+        FootballNews::where('id', $post['id'])->update([
+            'body' => json_encode($bodyArray),
+            'status' => $status,
+            'related_posts' => json_encode($relatedIds)
+        ]);
+
+        // Save meta tags
+        $news = FootballNews::find($post['id']);
+        if ($news && $meta) {
+            $news->metaTags()->delete();
+            foreach ($meta as $key => $value) {
+                $news->metaTags()->create([
+                    'tag_type' => str_starts_with($key, 'og:') || str_starts_with($key, 'twitter:') ? 'property' : 'name',
+                    'tag_key' => $key,
+                    'tag_value' => $value,
+                ]);
+            }
+        }
+
+        return "UPDATED - {$post['id']}";
+    }
+
+    private function getOldNewsId(): array
     {
         return FootballNews::orderByDesc('id')->take(50)->pluck('id')->toArray();
     }
 
-    private function updatePostBody($post, $buildId)
+    private function getNeedUpdateBodyPosts(): array
     {
-        $data = json_decode(Controller::getData(env('SOURCE_DOMAIN') . "_next/data/$buildId/en/news/article/{$post['slug']}-{$post['id']}.json?article={$post['slug']}-{$post['id']}"));
-
-        $news = FootballNews::find($post["id"]);
-        if (!$news) return;
-
-        if (isset($data->notFound) && $data->notFound) {
-            $news->increment('updatedTime');
-            return "NOT FOUND - {$post['id']}";
-        }
-
-        if (!isset($data->pageProps?->article?->body)) {
-            $news->increment('updatedTime');
-            return "FAIL - {$post['id']}";
-        }
-
-        $body = $data->pageProps->article->body;
-        $relatedPosts = collect($data->pageProps->article->related->relatedArticles ?? [])
-            ->pluck('id')->toArray();
-
-        $status = $this->checkBody($body) ? "publish" : "review-request";
-
-        // Crawl main image
-        $newsAssetPath = "../assets/news/" . $post["id"];
-        self::crawImage($post["imageUrl"], $newsAssetPath, "image");
-
-        // Crawl all image inside body
-        foreach ($body as $b) {
-            if (isset($b->type) && $b->type === "image") {
-                $b->data->type = "image";
-                $b->data->image = self::crawImage($b->image->article->url, $newsAssetPath, md5($b->image->article->url));
-            }
-        }
-
-        // Update body + status + related_posts
-        $news->update([
-            "body" => json_encode($body),
-            "status" => $status,
-            "related_posts" => json_encode($relatedPosts)
-        ]);
-
-        // Lưu lại meta tag dưới dạng từng dòng
-        $news->metaTags()->delete();
-        $meta = $data->pageProps->layoutContext->meta ?? null;
-        if ($meta && is_object($meta)) {
-            $metaTags = [];
-            foreach ($meta as $key => $value) {
-                $value = is_array($value) || is_object($value) ? json_encode($value) : $value;
-                $type = str_starts_with($key, 'og:') || str_starts_with($key, 'twitter:') ? 'property' : 'name';
-
-                $metaTags[] = [
-                    'tag_type' => $type,
-                    'tag_key' => $key,
-                    'tag_value' => $value
-                ];
-            }
-            $news->metaTags()->createMany($metaTags);
-        }
-
-        return "SUCCESS - {$post['id']}";
+        return FootballNews::whereNull('body')
+            ->where('status', 'draft')
+            ->where('updatedTime', '<', 5)
+            ->orderBy('updatedTime')
+            ->take(30)
+            ->get()
+            ->toArray();
     }
 
-    private function checkBody($body)
+    private function checkBody($body): bool
     {
         if (!$body) return false;
 
         foreach ($body as $tag) {
             $data = $tag->data ?? null;
-            if (isset($data->type) && in_array($data->type, ["paragraph", "heading"]) && $this->checkValidContent($data->content)) {
-                return false;
+            if ($data?->type && in_array($data->type, ['paragraph', 'heading']) && $this->checkValidContent($data->content)) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
-    private static function checkValidContent($content)
+    private static function checkValidContent($content): bool
     {
         $rejectKeywords = explode(',', env('REJECT_KEYWORDS', ''));
         foreach ($rejectKeywords as $keyword) {
@@ -177,41 +176,27 @@ class PostsCron extends Command
         return true;
     }
 
-    private function getNeedUpdateBodyPosts()
+    private static function getImageExt(string $url): string
     {
-        return FootballNews::whereNull("body")
-            ->where("status", "draft")
-            ->where("updatedTime", "<", 5)
-            ->orderBy("updatedTime")
-            ->take(30)
-            ->get()
-            ->toArray();
+        $parts = explode('.', explode('?', $url)[0]);
+        return '.' . end($parts);
     }
 
-    private static function getImageExt($url)
+    public static function crawImage(string $url, string $folder, string $fileName): string
     {
-        $clean = explode("?", $url)[0];
-        $ext = pathinfo($clean, PATHINFO_EXTENSION);
-        return '.' . ($ext ?: 'jpg');
-    }
-
-    public static function crawImage($url, $folder, $fileName)
-    {
-        if (!$fileName) return "";
-
         if (!File::exists($folder)) {
-            File::makeDirectory($folder, 0777, true, true);
+            File::makeDirectory($folder, 0777, true);
         }
 
         $ext = self::getImageExt($url);
-        $name = $fileName . $ext;
+        $path = "$folder/{$fileName}{$ext}";
 
-        $contents = Controller::getData($url);
-        if (strlen($contents) > 10000) {
-            file_put_contents($folder . "/" . $name, $contents);
-            return $name;
+        $content = Controller::getData($url);
+        if (strlen($content) > 10000) {
+            file_put_contents($path, $content);
+            return basename($path);
         }
 
-        return "";
+        return '';
     }
 }

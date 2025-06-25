@@ -22,7 +22,7 @@ class FootballNews extends Model
         'updatedTime',
         'imageExt',
         'status',
-        'related_posts'
+        'related_posts',
     ];
 
     protected $casts = [
@@ -30,17 +30,11 @@ class FootballNews extends Model
         'related_posts' => 'array',
     ];
 
-    /**
-     * Tags liên quan đến bài viết
-     */
     public function tags()
     {
-        return $this->hasMany(FootballNewsTag::class);
+        return $this->belongsToMany(FootballNewsTag::class, 'football_news_tag_relations');
     }
 
-    /**
-     * Meta tags dạng name/property để render SEO
-     */
     public function metaTags()
     {
         return $this->hasMany(FootballNewsMetaTag::class);
