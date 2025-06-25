@@ -178,7 +178,10 @@ class PostsCron extends Command
 
     private static function checkValidContent($content): bool
     {
-        $rejectKeywords = explode(',', env('REJECT_KEYWORDS', ''));
+        $defaultRejects = ['Promo Code'];
+        $envRejects = array_filter(array_map('trim', explode(',', env('REJECT_KEYWORDS', ''))));
+
+        $rejectKeywords = array_merge($defaultRejects, $envRejects);
         foreach ($rejectKeywords as $keyword) {
             if (stripos(strtolower($content), strtolower(trim($keyword))) !== false) {
                 return false;
