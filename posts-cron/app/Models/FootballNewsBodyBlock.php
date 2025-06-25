@@ -5,26 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FootballNewsTagRelation extends Model
+class FootballNewsBodyBlock extends Model
 {
     use HasFactory;
 
-    protected $table = 'football_news_tag_relations';
+    protected $table = 'football_news_body_blocks';
 
     protected $fillable = [
         'football_news_id',
-        'football_news_tag_id',
+        'offset',
+        'type',
+        'content_type',
+        'content',
     ];
 
     public $timestamps = false;
 
     public function news()
     {
-        return $this->belongsTo(FootballNews::class);
-    }
-
-    public function tag()
-    {
-        return $this->belongsTo(FootballNewsTag::class);
+        return $this->belongsTo(FootballNews::class, 'football_news_id');
     }
 }

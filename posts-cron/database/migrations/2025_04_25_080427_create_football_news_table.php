@@ -12,8 +12,8 @@ return new class extends Migration {
             $table->string('id')->primary();
             $table->string('title', 300);
             $table->string('slug', 300);
+            $table->string('description', 500)->nullable();
             $table->integer('publishedAt');
-            $table->json('body')->nullable();
             $table->string('imageUrl', 300);
             $table->string('alt', 300)->nullable();
             $table->tinyInteger('updatedTime')->default(0);
@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string('imageExt', 10)->nullable();
             $table->enum('status', ['draft', 'review-request', 'publish'])->default('draft');
             $table->json('related_posts')->nullable();
+            $table->boolean('meta_added')->default(false);
         });
 
         Schema::create('football_news_tags', function (Blueprint $table) {
@@ -32,9 +33,8 @@ return new class extends Migration {
 
         Schema::create('football_news_tag_relations', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('football_news_id');
+            $table->string('football_news_id');
             $table->unsignedBigInteger('football_news_tag_id');
-            $table->timestamps();
 
             $table->foreign('football_news_id')->references('id')->on('football_news')->onDelete('cascade');
             $table->foreign('football_news_tag_id')->references('id')->on('football_news_tags')->onDelete('cascade');
@@ -42,13 +42,26 @@ return new class extends Migration {
 
         Schema::create('football_news_meta_tags', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('football_news_id');
+            $table->string('football_news_id');
             $table->enum('tag_type', ['name', 'property']);
             $table->string('tag_key');
             $table->text('tag_value')->nullable();
             $table->timestamps();
 
             $table->foreign('football_news_id')->references('id')->on('football_news')->onDelete('cascade');
+        });
+
+        Schema::create('football_news_body_blocks', function (Blueprint $table) {
+            $table->id();
+            $table->string('football_news_id');
+            $table->unsignedInteger('offset');
+            $table->string('type', 50);
+            $table->string('content_type', 50)->nullable();
+            $table->longText('content')->nullable();
+
+            $table->foreign('football_news_id')
+                ->references('id')->on('football_news')
+                ->onDelete('cascade');
         });
     }
 
@@ -58,5 +71,6 @@ return new class extends Migration {
         Schema::dropIfExists('football_news_tag_relations');
         Schema::dropIfExists('football_news_tags');
         Schema::dropIfExists('football_news');
+        Schema::dropIfExists('football_news_body_blocks');
     }
 };

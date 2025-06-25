@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Http\Controllers\Controller;
 use App\Models\FootballNews;
+use App\Models\FootballNewsBodyBlock;
 use App\Models\FootballNewsTag;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
@@ -60,6 +61,7 @@ class PostsCron extends Command
                     'id' => $article->id,
                     'title' => $article->title,
                     'slug' => $slug,
+                    'description' => $article->description ?? '',
                     'publishedAt' => $publishedAt,
                     'imageUrl' => $article->mainMedia[0]->gallery->url,
                     'alt' => $article->mainMedia[0]->gallery->alt ?? '',
@@ -86,7 +88,7 @@ class PostsCron extends Command
         $url = env('SOURCE_DOMAIN') . "_next/data/$buildId/en/news/article/{$post['slug']}-{$post['id']}.json?article={$post['slug']}-{$post['id']}";
         $data = json_decode(Controller::getData($url));
 
-        if ($data?->notFound) {
+        if (isset($data->notFound) && $data->notFound) {
             FootballNews::where('id', $post['id'])->increment('updatedTime');
             return "NOT FOUND - {$post['id']}";
         }
@@ -100,38 +102,42 @@ class PostsCron extends Command
         $relatedIds = collect($data->pageProps->article->related->relatedArticles ?? [])->pluck('id')->toArray();
         $meta = $data->pageProps->layoutContext->meta ?? null;
 
-        $assetPath = public_path("assets/news/{$post['id']}");
-        self::crawImage($post['imageUrl'], $assetPath, 'image');
-
-        $bodyArray = [];
-        foreach ($body as $b) {
-            if (isset($b->type) && $b->type === 'image' && isset($b->image->article->url)) {
-                $b->data->type = 'image';
-                $b->data->image = self::crawImage($b->image->article->url, $assetPath, md5($b->image->article->url));
-            }
-            $bodyArray[] = $b;
-        }
+        $newsAssetPath = "../assets/news/" . $post["id"];
+        self::crawImage($post['imageUrl'], $newsAssetPath, 'image');
+        $offset = 0;
 
         $status = $this->checkBody($body) ? 'publish' : 'review-request';
 
+        if ($status === 'publish') {
+            foreach ($body as $b) {
+                if (isset($b->type)) {
+                    if ($b->type === 'image' && isset($b->image->article->url)) {
+                        $b->data->content = self::crawImage($b->image->article->url, $newsAssetPath, md5($b->image->article->url));
+                        FootballNewsBodyBlock::create([
+                            'football_news_id' => $post['id'],
+                            'offset' => $offset++,
+                            'type' => $b->type,
+                            'content_type' => 'image',
+                            'content' => $b->data->content ?? ''
+                        ]);
+                    } else {
+                        FootballNewsBodyBlock::create([
+                            'football_news_id' => $post['id'],
+                            'offset' => $offset++,
+                            'type' => $b->type,
+                            'content_type' => $b->data->type ?? $b->data->embed_type ?? null,
+                            'content' => $b->data->content ?? ''
+                        ]);
+                    }
+                }
+            }
+        }
+
         FootballNews::where('id', $post['id'])->update([
-            'body' => json_encode($bodyArray),
+            'description' => data_get($meta, 'description', ''),
             'status' => $status,
             'related_posts' => json_encode($relatedIds)
         ]);
-
-        // Save meta tags
-        $news = FootballNews::find($post['id']);
-        if ($news && $meta) {
-            $news->metaTags()->delete();
-            foreach ($meta as $key => $value) {
-                $news->metaTags()->create([
-                    'tag_type' => str_starts_with($key, 'og:') || str_starts_with($key, 'twitter:') ? 'property' : 'name',
-                    'tag_key' => $key,
-                    'tag_value' => $value,
-                ]);
-            }
-        }
 
         return "UPDATED - {$post['id']}";
     }
@@ -143,9 +149,9 @@ class PostsCron extends Command
 
     private function getNeedUpdateBodyPosts(): array
     {
-        return FootballNews::whereNull('body')
-            ->where('status', 'draft')
+        return FootballNews::where('status', 'draft')
             ->where('updatedTime', '<', 5)
+            ->whereDoesntHave('bodyBlocks')
             ->orderBy('updatedTime')
             ->take(30)
             ->get()
@@ -157,12 +163,17 @@ class PostsCron extends Command
         if (!$body) return false;
 
         foreach ($body as $tag) {
+            if ($tag->type === 'link') {
+                return false;
+            }
             $data = $tag->data ?? null;
-            if ($data?->type && in_array($data->type, ['paragraph', 'heading']) && $this->checkValidContent($data->content)) {
-                return true;
+            if ($data == null) return false;
+            $dataType = $data?->type ?? null;
+            if ($dataType != null && in_array($dataType, ['paragraph', 'heading']) && !$this->checkValidContent($data->content)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private static function checkValidContent($content): bool

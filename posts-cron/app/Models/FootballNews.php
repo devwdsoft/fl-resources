@@ -15,28 +15,40 @@ class FootballNews extends Model
         'id',
         'title',
         'slug',
+        'description',
         'publishedAt',
-        'body',
         'imageUrl',
         'alt',
         'updatedTime',
         'imageExt',
         'status',
         'related_posts',
+        'has_meta',
     ];
 
-    protected $casts = [
-        'body' => 'array',
-        'related_posts' => 'array',
-    ];
+    public $incrementing = false;
+    protected $keyType = 'string';
 
+    // Tags (many-to-many)
     public function tags()
     {
-        return $this->belongsToMany(FootballNewsTag::class, 'football_news_tag_relations');
+        return $this->belongsToMany(
+            FootballNewsTag::class,
+            'football_news_tag_relations',
+            'football_news_id',
+            'football_news_tag_id'
+        );
     }
 
+    // Meta tags (one-to-many)
     public function metaTags()
     {
-        return $this->hasMany(FootballNewsMetaTag::class);
+        return $this->hasMany(FootballNewsMetaTag::class, 'football_news_id');
+    }
+
+    // Body blocks (one-to-many)
+    public function bodyBlocks()
+    {
+        return $this->hasMany(FootballNewsBodyBlock::class, 'football_news_id');
     }
 }
