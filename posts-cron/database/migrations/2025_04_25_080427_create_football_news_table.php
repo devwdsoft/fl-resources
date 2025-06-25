@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    
+
     public function up(): void
     {
         Schema::create('football_news', function (Blueprint $table) {
@@ -33,7 +33,7 @@ return new class extends Migration {
         Schema::create('football_news_tag_relations', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('football_news_id');
-            $table->unsignedBigInteger('tag_id');
+            $table->unsignedBigInteger('football_news_tag_id');
             $table->timestamps();
 
             $table->foreign('football_news_id')->references('id')->on('football_news')->onDelete('cascade');
