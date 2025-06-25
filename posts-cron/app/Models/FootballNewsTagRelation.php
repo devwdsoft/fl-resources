@@ -13,7 +13,7 @@ class FootballNewsTagRelation extends Model
 
     protected $fillable = [
         'football_news_id',
-        'tag_id',
+        'football_news_tag_id',
     ];
 
     public function news()
