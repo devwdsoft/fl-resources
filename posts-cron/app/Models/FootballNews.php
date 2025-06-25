@@ -7,32 +7,42 @@ use Illuminate\Database\Eloquent\Model;
 
 class FootballNews extends Model
 {
-
     use HasFactory;
-    
+
     protected $table = 'football_news';
 
     protected $fillable = [
         'id',
         'title',
         'slug',
-        'meta',
         'publishedAt',
-        'tags',
         'body',
         'imageUrl',
         'alt',
         'updatedTime',
-        'createdAt',
         'imageExt',
         'status',
         'related_posts'
     ];
 
     protected $casts = [
-        'tags' => 'array',
-        'meta' => 'object',
-        "body" => 'array',
-        'related_posts' => 'array'
+        'body' => 'array',
+        'related_posts' => 'array',
     ];
+
+    /**
+     * Tags liên quan đến bài viết
+     */
+    public function tags()
+    {
+        return $this->hasMany(FootballNewsTag::class);
+    }
+
+    /**
+     * Meta tags dạng name/property để render SEO
+     */
+    public function metaTags()
+    {
+        return $this->hasMany(FootballNewsMetaTag::class);
+    }
 }

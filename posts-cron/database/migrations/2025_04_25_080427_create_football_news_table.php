@@ -16,17 +16,36 @@ return new class extends Migration
                 $table->id();
                 $table->string('title', 300);
                 $table->string('slug', 300);
-                $table->json('meta')->nullable();
                 $table->integer('publishedAt');
-                $table->json('tags')->nullable();
                 $table->json('body')->nullable();
                 $table->string('imageUrl', 300);
                 $table->string('alt', 300);
                 $table->tinyInteger('updatedTime');
-                $table->timestamps();
                 $table->string('imageExt', 10)->nullable();
                 $table->enum('status', ['draft', 'review-request', 'publish'])->default('draft');
                 $table->json('related_posts')->nullable();
+                $table->timestamps();
+            });
+
+            // Bảng phụ: football_news_tags
+            Schema::create('football_news_tags', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('football_news_id')->constrained('football_news')->onDelete('cascade');
+                $table->string('title');
+                $table->string('type')->nullable();
+                $table->string('href')->nullable();
+                $table->string('provider')->nullable();
+                $table->timestamps();
+            });
+
+            // Bảng phụ: football_news_meta_tags (SEO meta tags dạng foreach)
+            Schema::create('football_news_meta_tags', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('football_news_id')->constrained('football_news')->onDelete('cascade');
+                $table->enum('tag_type', ['name', 'property']);
+                $table->string('tag_key');
+                $table->text('tag_value');
+                $table->timestamps();
             });
         }
     }
@@ -36,6 +55,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('football_news_meta_tags');
+        Schema::dropIfExists('football_news_tags');
         Schema::dropIfExists('football_news');
     }
 };
