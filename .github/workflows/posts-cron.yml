@@ -62,3 +62,54 @@ jobs:
             echo "No changes to commit."
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           fi
+
+  deploy: #ffsdata1
+    needs: build-and-run
+    if: needs.build-and-run.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          ref: teams-cron
+
+      - name: Deploy to ffsdata6
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FFSDATA6 }}
+          channelId: live
+          projectId: ffsdata6
+
+      - name: Deploy to ffsdata7
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FFSDATA7 }}
+          channelId: live
+          projectId: ffsdata7
+
+      - name: Deploy to ffsdata8
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FFSDATA8 }}
+          channelId: live
+          projectId: ffsdata8
+
+      - name: Deploy to ffsdata9
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FFSDATA9 }}
+          channelId: live
+          projectId: ffsdata9
+
+      - name: Deploy to ffsdata10
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FFSDATA10 }}
+          channelId: live
+          projectId: ffsdata10
