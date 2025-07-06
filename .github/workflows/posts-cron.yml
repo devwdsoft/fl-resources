@@ -8,7 +8,9 @@ on:
 jobs:
   build-and-run:
     runs-on: ubuntu-latest
-
+    outputs:
+      has_changes: ${{ steps.check.outputs.has_changes }}
+    
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
