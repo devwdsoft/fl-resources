@@ -74,7 +74,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: teams-cron
+          ref: posts-cron
 
       - name: Deploy to ffsdata6
         uses: FirebaseExtended/action-hosting-deploy@v0
